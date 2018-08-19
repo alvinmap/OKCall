@@ -1,7 +1,7 @@
 package com.lzx.okcall.library;
 
 /**
- * 单例
+ * 封装单例模式
  */
 public abstract class Singleton<T> {
     private T mInstance;

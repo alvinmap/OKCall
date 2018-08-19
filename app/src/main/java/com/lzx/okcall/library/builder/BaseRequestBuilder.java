@@ -6,11 +6,14 @@ import java.util.Map;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 
+/**
+ * 基础builder
+ */
 public abstract class BaseRequestBuilder<T> {
-    protected Map<String, String> headers;
-    protected MediaType contentType;
-    protected boolean isFormEncoded = false;
-    protected boolean isMultipart = false;
+    Map<String, String> headers;
+    MediaType contentType;
+    boolean isFormEncoded = false;
+    boolean isMultipart = false;
 
     public T headers(Map<String, String> headers) {
         this.headers = headers;

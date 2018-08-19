@@ -37,7 +37,9 @@ import okio.Okio;
 import static com.lzx.okcall.library.Utils.checkNotNull;
 import static com.lzx.okcall.library.Utils.throwIfFatal;
 
-
+/**
+ * 封装OKHttp请求
+ */
 public class OkHttpCall implements Call {
     private final RequestBuilder requestBuilder;
     private okhttp3.Call.Factory callFactory;

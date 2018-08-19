@@ -20,10 +20,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", "1");
+
         String url = "https://www.easy-mock.com/mock/5b4c0d81a618510d7322b2f0/example/upload";
-        OkCall.post(url, null).build()
+        OkCall.injectCall()
+                .post(url, null).build()
                 .enqueue(new Callback() {
                     @Override
                     public void onResponse(Call call, Response response) {

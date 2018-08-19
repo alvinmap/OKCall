@@ -15,6 +15,10 @@ import okhttp3.ResponseBody;
 
 import static com.lzx.okcall.library.Utils.getSuperClassGenericType;
 
+/**
+ * 基础回调封装,返回解析后结果
+ * @param <T> 实体类l
+ */
 public abstract class BaseDataCallBack<T> implements Callback {
 
     private Gson gson;

@@ -11,6 +11,9 @@ import java.util.Set;
 
 import okhttp3.Call;
 
+/**
+ * 处理POST请求
+ */
 public class PostBuilder extends BaseRequestBuilder<PostBuilder> {
     private String requestUrl;
     private Map<String, Object> params;

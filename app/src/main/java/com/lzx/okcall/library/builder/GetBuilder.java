@@ -10,7 +10,9 @@ import java.util.Set;
 
 import okhttp3.Call;
 
-
+/**
+ * 处理GET请求
+ */
 public class GetBuilder extends BaseRequestBuilder<GetBuilder> {
     private String requestUrl;
     private Map<String, Object> params;

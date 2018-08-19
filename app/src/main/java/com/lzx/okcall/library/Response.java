@@ -26,7 +26,7 @@ import static com.lzx.okcall.library.Utils.checkNotNull;
 
 
 /**
- * An HTTP response.
+ * 封装请求结果
  */
 public final class Response {
 
