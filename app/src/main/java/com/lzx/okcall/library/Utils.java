@@ -45,16 +45,7 @@ public class Utils {
         if (httpUrl == null) {
             throw new IllegalArgumentException("Illegal URL: " + baseUrl);
         }
-        return baseUrl(httpUrl);
-    }
-
-    private static HttpUrl baseUrl(HttpUrl baseUrl) {
-        checkNotNull(baseUrl, "baseUrl == null");
-        List<String> pathSegments = baseUrl.pathSegments();
-        if (!"".equals(pathSegments.get(pathSegments.size() - 1))) {
-            throw new IllegalArgumentException("baseUrl must end in /: " + baseUrl);
-        }
-        return baseUrl;
+        return httpUrl;
     }
 
     public static Type getParameterUpperBound(int index, ParameterizedType type) {
@@ -102,4 +93,28 @@ public class Utils {
         throw new IllegalArgumentException("Expected a Class, ParameterizedType, or "
                 + "GenericArrayType, but <" + type + "> is of type " + type.getClass().getName());
     }
+
+    public static Class<Object> getSuperClassGenericType(final Class clazz, final int index) {
+
+        //返回表示此 Class 所表示的实体（类、接口、基本类型或 void）的直接超类的 Type。
+        Type genType = clazz.getGenericSuperclass();
+
+        if (!(genType instanceof ParameterizedType)) {
+            return Object.class;
+        }
+        //返回表示此类型实际类型参数的 Type 对象的数组。
+        Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
+
+        if (index >= params.length || index < 0) {
+            return Object.class;
+        }
+        if (!(params[index] instanceof Class)) {
+            return Object.class;
+        }
+
+        return (Class) params[index];
+    }
+
+
+
 }

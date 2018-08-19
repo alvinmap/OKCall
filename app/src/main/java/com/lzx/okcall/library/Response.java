@@ -28,11 +28,9 @@ import static com.lzx.okcall.library.Utils.checkNotNull;
 /**
  * An HTTP response.
  */
-public final class Response<T> {
-    /**
-     * Create a synthetic successful response with {@code body} as the deserialized body.
-     */
-    public static <T> Response<T> success(@Nullable T body) {
+public final class Response {
+
+    public static Response success(@Nullable ResponseBody body) {
         return success(body, new okhttp3.Response.Builder() //
                 .code(200)
                 .message("OK")
@@ -41,11 +39,7 @@ public final class Response<T> {
                 .build());
     }
 
-    /**
-     * Create a synthetic successful response with an HTTP status code of {@code code} and
-     * {@code body} as the deserialized body.
-     */
-    public static <T> Response<T> success(int code, @Nullable T body) {
+    public static Response success(int code, @Nullable ResponseBody body) {
         if (code < 200 || code >= 300) {
             throw new IllegalArgumentException("code < 200 or >= 300: " + code);
         }
@@ -57,11 +51,7 @@ public final class Response<T> {
                 .build());
     }
 
-    /**
-     * Create a synthetic successful response using {@code headers} with {@code body} as the
-     * deserialized body.
-     */
-    public static <T> Response<T> success(@Nullable T body, Headers headers) {
+    public static Response success(@Nullable ResponseBody body, Headers headers) {
         checkNotNull(headers, "headers == null");
         return success(body, new okhttp3.Response.Builder() //
                 .code(200)
@@ -72,23 +62,15 @@ public final class Response<T> {
                 .build());
     }
 
-    /**
-     * Create a successful response from {@code rawResponse} with {@code body} as the deserialized
-     * body.
-     */
-    public static <T> Response<T> success(@Nullable T body, okhttp3.Response rawResponse) {
+    public static Response success(@Nullable ResponseBody body, okhttp3.Response rawResponse) {
         checkNotNull(rawResponse, "rawResponse == null");
         if (!rawResponse.isSuccessful()) {
             throw new IllegalArgumentException("rawResponse must be successful response");
         }
-        return new Response<>(rawResponse, body, null);
+        return new Response(rawResponse, body, null);
     }
 
-    /**
-     * Create a synthetic error response with an HTTP status code of {@code code} and {@code body}
-     * as the error body.
-     */
-    public static <T> Response<T> error(int code, ResponseBody body) {
+    public static Response error(int code, ResponseBody body) {
         if (code < 400) throw new IllegalArgumentException("code < 400: " + code);
         return error(body, new okhttp3.Response.Builder() //
                 .code(code)
@@ -98,77 +80,52 @@ public final class Response<T> {
                 .build());
     }
 
-    /**
-     * Create an error response from {@code rawResponse} with {@code body} as the error body.
-     */
-    public static <T> Response<T> error(ResponseBody body, okhttp3.Response rawResponse) {
+    public static Response error(ResponseBody body, okhttp3.Response rawResponse) {
         checkNotNull(body, "body == null");
         checkNotNull(rawResponse, "rawResponse == null");
         if (rawResponse.isSuccessful()) {
             throw new IllegalArgumentException("rawResponse should not be successful response");
         }
-        return new Response<>(rawResponse, null, body);
+        return new Response(rawResponse, null, body);
     }
 
     private final okhttp3.Response rawResponse;
     private final @Nullable
-    T body;
+    ResponseBody body;
     private final @Nullable
     ResponseBody errorBody;
 
-    private Response(okhttp3.Response rawResponse, @Nullable T body,
-                     @Nullable ResponseBody errorBody) {
+    private Response(okhttp3.Response rawResponse, @Nullable ResponseBody body, @Nullable ResponseBody errorBody) {
         this.rawResponse = rawResponse;
         this.body = body;
         this.errorBody = errorBody;
     }
 
-    /**
-     * The raw response from the HTTP client.
-     */
     public okhttp3.Response raw() {
         return rawResponse;
     }
 
-    /**
-     * HTTP status code.
-     */
     public int code() {
         return rawResponse.code();
     }
 
-    /**
-     * HTTP status message or null if unknown.
-     */
     public String message() {
         return rawResponse.message();
     }
 
-    /**
-     * HTTP headers.
-     */
     public Headers headers() {
         return rawResponse.headers();
     }
 
-    /**
-     * Returns true if {@link #code()} is in the range [200..300).
-     */
     public boolean isSuccessful() {
         return rawResponse.isSuccessful();
     }
 
-    /**
-     * The deserialized response body of a {@linkplain #isSuccessful() successful} response.
-     */
     public @Nullable
-    T body() {
+    ResponseBody body() {
         return body;
     }
 
-    /**
-     * The raw response body of an {@linkplain #isSuccessful() unsuccessful} response.
-     */
     public @Nullable
     ResponseBody errorBody() {
         return errorBody;

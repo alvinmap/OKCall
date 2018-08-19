@@ -16,7 +16,6 @@
 package com.lzx.okcall.library.call;
 
 
-
 import com.lzx.okcall.library.Response;
 
 import java.io.IOException;
@@ -24,19 +23,19 @@ import java.io.IOException;
 import okhttp3.Request;
 
 
-public interface Call<T> extends Cloneable {
+public interface Call extends Cloneable {
 
-  Response<T> execute() throws IOException;
+    Response execute() throws IOException;
 
-  void enqueue(Callback<T> callback);
+    void enqueue(Callback callback);
 
-  boolean isExecuted();
+    boolean isExecuted();
 
-  void cancel();
+    void cancel();
 
-  boolean isCanceled();
+    boolean isCanceled();
 
-  Call<T> clone();
+    Call clone();
 
-  Request request();
+    Request request();
 }

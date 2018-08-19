@@ -18,9 +18,9 @@ package com.lzx.okcall.library.call;
 
 import com.lzx.okcall.library.Response;
 
-public interface Callback<T> {
+public interface Callback {
 
-  void onResponse(Call<T> call, Response<T> response);
+    void onResponse(Call call, Response response);
 
-  void onFailure(Call<T> call, Throwable t);
+    void onFailure(Call call, Throwable t);
 }

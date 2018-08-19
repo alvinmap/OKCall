@@ -1,9 +1,7 @@
 package com.lzx.okcall.library;
 
-
-
-import com.lzx.okcall.library.analyze.GsonConverterFactory;
 import com.lzx.okcall.library.builder.GetBuilder;
+import com.lzx.okcall.library.builder.PostBuilder;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -32,13 +30,25 @@ public class OkCall {
         }
     }
 
-    public static <T> GetBuilder<T> get(String url, Map<String, Object> params) {
+    public static GetBuilder get(String url, Map<String, Object> params) {
         String realUrl = handlerUrl(url);
-        GetBuilder<T> builder = new GetBuilder<>(realUrl, params, false, mOkHttpClient, GsonConverterFactory.create());
-        return builder;
+        return new GetBuilder(realUrl, params, false, mOkHttpClient);
     }
 
     public void getWithToken() {
+
+    }
+
+    public static PostBuilder post(String url, Map<String, Object> params) {
+        String realUrl = handlerUrl(url);
+        return new PostBuilder(realUrl, params, false, mOkHttpClient);
+    }
+
+    public void postString() {
+
+    }
+
+    public void postFile() {
 
     }
 

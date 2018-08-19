@@ -21,7 +21,7 @@ import android.support.annotation.Nullable;
 
 import com.lzx.okcall.library.Response;
 import com.lzx.okcall.library.Utils;
-import com.lzx.okcall.library.analyze.Converter;
+
 import com.lzx.okcall.library.builder.RequestBuilder;
 
 import java.io.IOException;
@@ -38,11 +38,9 @@ import static com.lzx.okcall.library.Utils.checkNotNull;
 import static com.lzx.okcall.library.Utils.throwIfFatal;
 
 
-public class OkHttpCall<T> implements Call<T> {
+public class OkHttpCall implements Call {
     private final RequestBuilder requestBuilder;
     private okhttp3.Call.Factory callFactory;
-    private Converter<ResponseBody, T> responseConverter;
-
     private volatile boolean canceled;
 
     @GuardedBy("this")
@@ -54,18 +52,16 @@ public class OkHttpCall<T> implements Call<T> {
     @GuardedBy("this")
     private boolean executed;
 
-    public OkHttpCall(RequestBuilder requestBuilder, okhttp3.Call.Factory callFactory, Converter<ResponseBody, T> responseConverter) {
+    public OkHttpCall(RequestBuilder requestBuilder, okhttp3.Call.Factory callFactory) {
         this.requestBuilder = requestBuilder;
-
         this.callFactory = callFactory;
-        this.responseConverter = responseConverter;
     }
 
     @SuppressWarnings("CloneDoesntCallSuperClone")
     // We are a final type & this saves clearing state.
     @Override
-    public OkHttpCall<T> clone() {
-        return new OkHttpCall<>(requestBuilder, callFactory, responseConverter);
+    public OkHttpCall clone() {
+        return new OkHttpCall(requestBuilder, callFactory);
     }
 
     @Override
@@ -96,7 +92,7 @@ public class OkHttpCall<T> implements Call<T> {
     }
 
     @Override
-    public void enqueue(final Callback<T> callback) {
+    public void enqueue(final Callback callback) {
         checkNotNull(callback, "callback == null");
 
         okhttp3.Call call;
@@ -130,7 +126,7 @@ public class OkHttpCall<T> implements Call<T> {
         call.enqueue(new okhttp3.Callback() {
             @Override
             public void onResponse(okhttp3.Call call, okhttp3.Response rawResponse) {
-                Response<T> response;
+                Response response;
                 try {
                     response = parseResponse(rawResponse);
                 } catch (Throwable e) {
@@ -167,7 +163,7 @@ public class OkHttpCall<T> implements Call<T> {
     }
 
     @Override
-    public Response<T> execute() throws IOException {
+    public Response execute() throws IOException {
         okhttp3.Call call;
 
         synchronized (this) {
@@ -211,7 +207,7 @@ public class OkHttpCall<T> implements Call<T> {
         return call;
     }
 
-    Response<T> parseResponse(okhttp3.Response rawResponse) throws IOException {
+    Response parseResponse(okhttp3.Response rawResponse) throws IOException {
 
         ResponseBody rawBody = rawResponse.body();
 
@@ -238,8 +234,8 @@ public class OkHttpCall<T> implements Call<T> {
 
         ExceptionCatchingResponseBody catchingBody = new ExceptionCatchingResponseBody(rawBody);
         try {
-            T body = responseConverter.convert(catchingBody);
-            return Response.success(body, rawResponse);
+
+            return Response.success(catchingBody, rawResponse);
         } catch (RuntimeException e) {
             // If the underlying source threw an exception, propagate that rather than indicating it was
             // a runtime exception.
