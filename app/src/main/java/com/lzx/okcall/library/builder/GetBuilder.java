@@ -1,6 +1,7 @@
 package com.lzx.okcall.library.builder;
 
 import android.net.Uri;
+
 import com.lzx.okcall.library.HttpMethod;
 import com.lzx.okcall.library.Utils;
 import com.lzx.okcall.library.call.OkHttpCall;
@@ -19,6 +20,7 @@ public class GetBuilder extends BaseRequestBuilder<GetBuilder> {
     private boolean hasBody;
     private okhttp3.Call.Factory callFactory;
 
+
     public GetBuilder(String requestUrl, Map<String, Object> params, boolean hasBody, Call.Factory callFactory) {
         this.requestUrl = requestUrl;
         this.params = params;
@@ -26,6 +28,7 @@ public class GetBuilder extends BaseRequestBuilder<GetBuilder> {
         this.callFactory = callFactory;
     }
 
+    @Override
     public OkHttpCall build() {
         if (params != null) {
             requestUrl = appendParams(requestUrl, params);
@@ -39,7 +42,15 @@ public class GetBuilder extends BaseRequestBuilder<GetBuilder> {
                 hasBody,
                 isFormEncoded,
                 isMultipart);
-        return new OkHttpCall(builder, callFactory);
+        mOkHttpCall = new OkHttpCall(builder, callFactory);
+        return mOkHttpCall;
+    }
+
+    @Override
+    public void cancel() {
+        if (mOkHttpCall != null && !mOkHttpCall.isCanceled()) {
+            mOkHttpCall.cancel();
+        }
     }
 
     private String appendParams(String url, Map<String, Object> params) {

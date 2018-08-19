@@ -1,5 +1,7 @@
 package com.lzx.okcall.library.builder;
 
+import com.lzx.okcall.library.call.OkHttpCall;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -14,6 +16,7 @@ public abstract class BaseRequestBuilder<T> {
     MediaType contentType;
     boolean isFormEncoded = false;
     boolean isMultipart = false;
+    OkHttpCall mOkHttpCall;
 
     public T headers(Map<String, String> headers) {
         this.headers = headers;
@@ -43,7 +46,7 @@ public abstract class BaseRequestBuilder<T> {
         return (T) this;
     }
 
-    protected Headers appendHeaders() {
+    Headers appendHeaders() {
         Headers.Builder headerBuilder = new Headers.Builder();
         if (headers == null || headers.isEmpty()) {
             return null;
@@ -53,4 +56,8 @@ public abstract class BaseRequestBuilder<T> {
         }
         return headerBuilder.build();
     }
+
+    public abstract OkHttpCall build();
+
+    public abstract void cancel();
 }

@@ -20,6 +20,7 @@ public class PostBuilder extends BaseRequestBuilder<PostBuilder> {
     private boolean hasBody;
     private okhttp3.Call.Factory callFactory;
 
+
     public PostBuilder(String requestUrl, Map<String, Object> params, boolean hasBody, Call.Factory callFactory) {
         this.requestUrl = requestUrl;
         this.params = params;
@@ -27,9 +28,10 @@ public class PostBuilder extends BaseRequestBuilder<PostBuilder> {
         this.callFactory = callFactory;
     }
 
+    @Override
     public OkHttpCall build() {
         isFormEncoded = params != null;
-        if (!isFormEncoded){
+        if (!isFormEncoded) {
             hasBody = true;
         }
         RequestBuilder builder = new RequestBuilder(
@@ -50,6 +52,15 @@ public class PostBuilder extends BaseRequestBuilder<PostBuilder> {
             }
         }
 
-        return new OkHttpCall(builder, callFactory);
+        mOkHttpCall = new OkHttpCall(builder, callFactory);
+        return mOkHttpCall;
     }
+
+    @Override
+    public void cancel() {
+        if (mOkHttpCall != null && !mOkHttpCall.isCanceled()) {
+            mOkHttpCall.cancel();
+        }
+    }
+
 }
