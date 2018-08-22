@@ -11,29 +11,33 @@ GET 请求有两个参数，第一个是请求 URL,第二个是请求参数，�
 1. 普通回调
 
 ```java
-OkCall.injectCall().get(url, null)
-            .build()
-            .enqueue(new Callback() {
-                @Override
-                public void onResponse(Call call, Response response) {
-                    try {
-                        Log.i("MainActivity", "json = " + response.body().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+String url = "https://www.easy-mock.com/mock/5b4c0d81a618510d7322b2f0/example/query";
+OkCall.injectCall()
+        .get(url, null)
+        .build()
+        .enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                try {
+                    Log.i("MainActivity", "json = " + response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+            }
 
-                @Override
-                public void onFailure(Call call, Throwable t) {
-                    Log.i("MainActivity", "Throwable = " + t.getMessage());
-                }
-            });
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                Log.i("MainActivity", "Throwable = " + t.getMessage());
+            }
+        });
 ```
 
 2. 结合 Gson 做数据解析的回调
 
 ```java
-OkCall.injectCall().get(url, null)
+String url = "https://www.easy-mock.com/mock/5b4c0d81a618510d7322b2f0/example/query";
+OkCall.injectCall()
+        .get(url, null)
         .build()
         .enqueue(new BaseDataCallBack<LZX>() {
             @Override
