@@ -1,5 +1,9 @@
 package com.lzx.okcall.library.rx;
 
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 import com.lzx.okcall.library.Response;
 
 import java.io.IOException;
@@ -10,6 +14,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.CompositeException;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.plugins.RxJavaPlugins;
+import okhttp3.ResponseBody;
+
+import static com.lzx.okcall.library.Utils.getSuperClassGenericType;
 
 /**
  * create by lzx
@@ -19,8 +26,10 @@ public class ResultObservable extends Observable<String> {
 
     private Observable<Response> upstream;
 
+
     public ResultObservable(Observable<Response> upstream) {
         this.upstream = upstream;
+
     }
 
     @Override
@@ -33,13 +42,24 @@ public class ResultObservable extends Observable<String> {
 
             @Override
             public void onNext(Response response) {
+                ResponseBody value = response.body();
+                if (value == null) {
+                    return;
+                }
                 try {
-                    String json = response.body().string();
-                    observer.onNext(json);
-                } catch (IOException e) {
+                    String result = value.string();
+                    if (result != null) {
+                        observer.onNext(result);
+                    } else {
+                        observer.onError(new Throwable("request result is null"));
+                        observer.onComplete();
+                    }
+                } catch (Exception e) {
                     e.printStackTrace();
                     observer.onError(e);
                     observer.onComplete();
+                } finally {
+                    value.close();
                 }
             }
 
