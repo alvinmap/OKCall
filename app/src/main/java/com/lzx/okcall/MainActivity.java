@@ -1,5 +1,6 @@
 package com.lzx.okcall;
 
+import android.annotation.SuppressLint;
 import android.content.ContentProvider;
 import android.os.Messenger;
 import android.support.v7.app.AppCompatActivity;
@@ -17,56 +18,36 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+
 public class MainActivity extends AppCompatActivity {
 
+    @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        OkCall.injectCall().getOkHttpClient().dispatcher().executorService().execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String url = "https://www.easy-mock.com/mock/5b4c0d81a618510d7322b2f0/example/query";
-                    Response response = OkCall.injectCall().get(url, null).build().execute();
-                    Log.i("xian", "result = " + response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.i("xian", "result = " + e.getMessage());
-                }
-            }
-        });
+        String url = "https://www.baidu.com/";
+        OkCall.injectCall()
+                .get(url, null)
+                .rxBuildMaybe()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String s) {
+                        Log.i("xian", "json = " + s);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) {
 
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    String url = "https://www.easy-mock.com/mock/5b4c0d81a618510d7322b2f0/example/query";
-//                    Response response = OkCall.injectCall().get(url, null).build().execute();
-//                    Log.i("xian", "result = " + response.body().string());
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                    Log.i("xian", "result = " + e.getMessage());
-//                }
-//            }
-//        }).start();
-
-//                .enqueue(new Callback() {
-//                    @Override
-//                    public void onResponse(Call call, Response response) {
-//                        try {
-//                            Log.i("xian", "result = " + response.body().string());
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                            Log.i("xian", "IOException = " + e.getMessage());
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call call, Throwable t) {
-//                        Log.i("xian", "errorString = " + t.getMessage());
-//                    }
-//                });
+                    }
+                });
     }
 
     public class LZX {

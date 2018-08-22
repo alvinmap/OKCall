@@ -61,9 +61,8 @@ public class OkCall {
                 requestBuilder.addQueryParam(key, String.valueOf(params.get(key)), false);
             }
         }
-        return new GetBuilder(realUrl, params, mOkHttpClient, requestBuilder);
+        return new GetBuilder(mOkHttpClient, requestBuilder);
     }
-
 
     public PostBuilder post(String url, Map<String, Object> params) {
         String realUrl = handlerUrl(url);
@@ -82,7 +81,7 @@ public class OkCall {
                 requestBuilder.addFormField(key, String.valueOf(params.get(key)), false);
             }
         }
-        return new PostBuilder(realUrl, params, mOkHttpClient, requestBuilder);
+        return new PostBuilder(mOkHttpClient, requestBuilder);
     }
 
     public void postString() {
@@ -99,6 +98,7 @@ public class OkCall {
     private String handlerUrl(String url) {
         return url;
     }
+
 
     public interface Method {
         String GET = "GET";

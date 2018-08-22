@@ -5,6 +5,7 @@ import com.lzx.okcall.library.call.OkHttpCall;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.reactivex.Scheduler;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 
@@ -15,7 +16,7 @@ public abstract class BaseRequestBuilder<T> {
     Map<String, String> headers;
     MediaType contentType;
 
-    OkHttpCall mOkHttpCall;
+    Scheduler scheduler;
 
     public T headers(Map<String, String> headers) {
         this.headers = headers;
@@ -35,8 +36,6 @@ public abstract class BaseRequestBuilder<T> {
         return (T) this;
     }
 
-
-
     Headers appendHeaders() {
         Headers.Builder headerBuilder = new Headers.Builder();
         if (headers == null || headers.isEmpty()) {
@@ -50,5 +49,11 @@ public abstract class BaseRequestBuilder<T> {
 
     public abstract OkHttpCall build();
 
-    public abstract void cancel();
+    public T setScheduler(Scheduler scheduler) {
+        this.scheduler = scheduler;
+        return (T) this;
+    }
+
+
+
 }
