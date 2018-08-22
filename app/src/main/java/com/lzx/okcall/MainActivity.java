@@ -52,6 +52,23 @@ public class MainActivity extends AppCompatActivity {
         OkCall.injectCall()
                 .get(url, null)
                 .rxBuild()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String json) {
+                        Log.i("xian", "json = " + json);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) {
+                        Log.i("xian", "throwable = " + throwable.getMessage());
+                    }
+                });
+
+        OkCall.injectCall()
+                .get(url, null)
+                .rxBuild()
                 .map(new Function<String, LZX>() {
                     @Override
                     public LZX apply(String s) {
@@ -69,6 +86,39 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void accept(Throwable throwable) {
                         Log.i("xian", "throwable = " + throwable.getMessage());
+                    }
+                });
+
+
+        OkCall.injectCall().get(url, null)
+                .build()
+                .enqueue(new Callback() {
+                    @Override
+                    public void onResponse(Call call, Response response) {
+                        try {
+                            Log.i("MainActivity", "json = " + response.body().string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call call, Throwable t) {
+                        Log.i("MainActivity", "Throwable = " + t.getMessage());
+                    }
+                });
+
+        OkCall.injectCall().get(url, null)
+                .build()
+                .enqueue(new BaseDataCallBack<LZX>() {
+                    @Override
+                    public void onResponse(LZX result) {
+                        Log.i("MainActivity", "result = " + result.toString());
+                    }
+
+                    @Override
+                    public void onFailure(String errorString) {
+                        Log.i("MainActivity", "onFailure = " + errorString);
                     }
                 });
     }
