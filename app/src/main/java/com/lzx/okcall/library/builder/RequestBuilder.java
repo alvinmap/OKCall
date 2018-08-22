@@ -17,6 +17,8 @@ package com.lzx.okcall.library.builder;
 
 import android.support.annotation.Nullable;
 
+import com.lzx.okcall.library.Utils;
+
 import java.io.IOException;
 
 import okhttp3.FormBody;
@@ -34,53 +36,61 @@ public class RequestBuilder {
             {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     private static final String PATH_SEGMENT_ALWAYS_ENCODE_SET = " \"<>^`{}|\\?#";
 
-    private final String method;
+    private String method;
+    private HttpUrl baseUrl;
+    private String relativeUrl;
+    private HttpUrl.Builder urlBuilder;
+    private Request.Builder requestBuilder;
+    private MediaType contentType;
+    private boolean hasBody;
+    private MultipartBody.Builder multipartBuilder;
+    private FormBody.Builder formBuilder;
+    private RequestBody body;
+    private boolean isFormEncoded;
+    private boolean isMultipart;
 
-    private final HttpUrl baseUrl;
-    private @Nullable
-    String relativeUrl;
-    private @Nullable
-    HttpUrl.Builder urlBuilder;
-
-    private final Request.Builder requestBuilder;
-    private @Nullable
-    MediaType contentType;
-
-    private final boolean hasBody;
-    private @Nullable
-    MultipartBody.Builder multipartBuilder;
-    private @Nullable
-    FormBody.Builder formBuilder;
-    private @Nullable
-    RequestBody body;
-
-    RequestBuilder(String method, HttpUrl baseUrl, @Nullable String relativeUrl,
-                   @Nullable Headers headers, @Nullable MediaType contentType, boolean hasBody,
-                   boolean isFormEncoded, boolean isMultipart) {
+    public RequestBuilder(String method, @Nullable String relativeUrl, boolean hasBody, boolean isFormEncoded, boolean isMultipart) {
         this.method = method;
-        this.baseUrl = baseUrl;
+        this.baseUrl = Utils.baseUrl(relativeUrl);
         this.relativeUrl = relativeUrl;
-        this.requestBuilder = new Request.Builder();
-        this.contentType = contentType;
+        this.isFormEncoded = isFormEncoded;
         this.hasBody = hasBody;
+        this.isMultipart = isMultipart;
+        this.requestBuilder = new Request.Builder();
+    }
+
+    public void setHeaders(@Nullable Headers headers) {
         if (headers != null) {
-            requestBuilder.headers(headers);
+            requestBuilder.headers(headers); //header
         }
+    }
+
+    public void setContentType(@Nullable MediaType contentType) {
+        this.contentType = contentType; //媒体类型
+    }
+
+    public void createBuilder() {
         if (isFormEncoded) {
-            // Will be set to 'body' in 'build'.
+            //POST请求相关
             formBuilder = new FormBody.Builder();
         } else if (isMultipart) {
-            // Will be set to 'body' in 'build'.
+            //文件上传相关
             multipartBuilder = new MultipartBody.Builder();
             multipartBuilder.setType(MultipartBody.FORM);
         }
     }
 
-    void setRelativeUrl(Object relativeUrl) {
+    /**
+     * 设置url
+     */
+    public void setRelativeUrl(Object relativeUrl) {
         this.relativeUrl = relativeUrl.toString();
     }
 
-    void addHeader(String name, String value) {
+    /**
+     * 添加header
+     */
+    public void addHeader(String name, String value) {
         if ("Content-Type".equalsIgnoreCase(name)) {
             MediaType type = MediaType.parse(value);
             if (type == null) {
@@ -92,9 +102,11 @@ public class RequestBuilder {
         }
     }
 
-    void addPathParam(String name, String value, boolean encoded) {
+    /**
+     * 添加path参数
+     */
+    public void addPathParam(String name, String value, boolean encoded) {
         if (relativeUrl == null) {
-            // The relative URL is cleared when the first query parameter is set.
             throw new AssertionError();
         }
         relativeUrl = relativeUrl.replace("{" + name + "}", canonicalizeForPath(value, encoded));
@@ -149,13 +161,15 @@ public class RequestBuilder {
         }
     }
 
-    void addQueryParam(String name, @Nullable String value, boolean encoded) {
+    /**
+     * 添加get参数
+     */
+    public void addQueryParam(String name, @Nullable String value, boolean encoded) {
         if (relativeUrl != null) {
             // Do a one-time combination of the built relative URL and the base URL.
             urlBuilder = baseUrl.newBuilder(relativeUrl);
             if (urlBuilder == null) {
-                throw new IllegalArgumentException(
-                        "Malformed URL. Base: " + baseUrl + ", Relative: " + relativeUrl);
+                throw new IllegalArgumentException("Malformed URL. Base: " + baseUrl + ", Relative: " + relativeUrl);
             }
             relativeUrl = null;
         }
@@ -169,33 +183,42 @@ public class RequestBuilder {
         }
     }
 
+    /**
+     * 添加Post参数
+     */
     @SuppressWarnings("ConstantConditions")
-        // Only called when isFormEncoded was true.
-    void addFormField(String name, String value, boolean encoded) {
-        if (encoded) {
-            formBuilder.addEncoded(name, value);
-        } else {
-            formBuilder.add(name, value);
+    // Only called when isFormEncoded was true.
+    public void addFormField(String name, String value, boolean encoded) {
+        if (isFormEncoded) {
+            if (encoded) {
+                formBuilder.addEncoded(name, value);
+            } else {
+                formBuilder.add(name, value);
+            }
         }
     }
 
     @SuppressWarnings("ConstantConditions")
-        // Only called when isMultipart was true.
-    void addPart(Headers headers, RequestBody body) {
-        multipartBuilder.addPart(headers, body);
+    // Only called when isMultipart was true.
+    public void addPart(Headers headers, RequestBody body) {
+        if (isMultipart) {
+            multipartBuilder.addPart(headers, body);
+        }
     }
 
     @SuppressWarnings("ConstantConditions")
-        // Only called when isMultipart was true.
-    void addPart(MultipartBody.Part part) {
-        multipartBuilder.addPart(part);
+    // Only called when isMultipart was true.
+    public void addPart(MultipartBody.Part part) {
+        if (isMultipart) {
+            multipartBuilder.addPart(part);
+        }
     }
 
-    void setBody(RequestBody body) {
+    public void setBody(RequestBody body) {
         this.body = body;
     }
 
-   public Request build() {
+    public Request build() {
         HttpUrl url;
         HttpUrl.Builder urlBuilder = this.urlBuilder;
         if (urlBuilder != null) {
@@ -218,7 +241,7 @@ public class RequestBuilder {
             } else if (multipartBuilder != null) {
                 body = multipartBuilder.build();
             } else if (hasBody) {
-                // Body is absent, make an empty body.
+                //post请求一定要有body，创建一个空的
                 body = RequestBody.create(null, new byte[0]);
             }
         }

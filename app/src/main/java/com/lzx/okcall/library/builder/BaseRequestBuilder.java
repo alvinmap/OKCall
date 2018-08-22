@@ -14,8 +14,7 @@ import okhttp3.MediaType;
 public abstract class BaseRequestBuilder<T> {
     Map<String, String> headers;
     MediaType contentType;
-    boolean isFormEncoded = false;
-    boolean isMultipart = false;
+
     OkHttpCall mOkHttpCall;
 
     public T headers(Map<String, String> headers) {
@@ -36,15 +35,7 @@ public abstract class BaseRequestBuilder<T> {
         return (T) this;
     }
 
-    public T setFormEncoded(boolean formEncoded) {
-        isFormEncoded = formEncoded;
-        return (T) this;
-    }
 
-    public T setMultipart(boolean multipart) {
-        isMultipart = multipart;
-        return (T) this;
-    }
 
     Headers appendHeaders() {
         Headers.Builder headerBuilder = new Headers.Builder();

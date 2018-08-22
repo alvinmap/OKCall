@@ -2,14 +2,13 @@ package com.lzx.okcall.library.builder;
 
 import android.net.Uri;
 
-import com.lzx.okcall.library.HttpMethod;
-import com.lzx.okcall.library.Utils;
 import com.lzx.okcall.library.call.OkHttpCall;
 
 import java.util.Map;
 import java.util.Set;
 
 import okhttp3.Call;
+import okhttp3.internal.http.HttpMethod;
 
 /**
  * 处理GET请求
@@ -17,32 +16,27 @@ import okhttp3.Call;
 public class GetBuilder extends BaseRequestBuilder<GetBuilder> {
     private String requestUrl;
     private Map<String, Object> params;
-    private boolean hasBody;
+    private boolean hasBody = false;
     private okhttp3.Call.Factory callFactory;
+    private RequestBuilder requestBuilder;
 
-
-    public GetBuilder(String requestUrl, Map<String, Object> params, boolean hasBody, Call.Factory callFactory) {
+    public GetBuilder(String requestUrl, Map<String, Object> params, Call.Factory callFactory, RequestBuilder requestBuilder) {
         this.requestUrl = requestUrl;
         this.params = params;
-        this.hasBody = hasBody;
         this.callFactory = callFactory;
+        this.requestBuilder = requestBuilder;
     }
 
     @Override
     public OkHttpCall build() {
-        if (params != null) {
-            requestUrl = appendParams(requestUrl, params);
+        if (headers != null) {
+            requestBuilder.setHeaders(appendHeaders());
         }
-        RequestBuilder builder = new RequestBuilder(
-                HttpMethod.GET,
-                Utils.baseUrl(requestUrl),
-                requestUrl,
-                appendHeaders(),
-                contentType,
-                hasBody,
-                isFormEncoded,
-                isMultipart);
-        mOkHttpCall = new OkHttpCall(builder, callFactory);
+        if (contentType!=null){
+            requestBuilder.setContentType(contentType);
+        }
+        requestBuilder.createBuilder();
+        mOkHttpCall = new OkHttpCall(requestBuilder, callFactory);
         return mOkHttpCall;
     }
 

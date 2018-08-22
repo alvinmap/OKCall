@@ -34,6 +34,7 @@ public abstract class BaseDataCallBack<T> implements Callback {
     @Override
     public void onResponse(Call call, Response response) {
         this.persistentClass = (Class<T>) getSuperClassGenericType(getClass(), 0);
+
         ResponseBody value = response.body();
         if (value == null) {
             return;
