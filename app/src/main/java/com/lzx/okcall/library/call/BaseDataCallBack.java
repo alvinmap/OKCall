@@ -1,15 +1,10 @@
 package com.lzx.okcall.library.call;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import com.lzx.okcall.library.Response;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import com.lzx.okcall.library.info.Response;
 
 import okhttp3.ResponseBody;
 

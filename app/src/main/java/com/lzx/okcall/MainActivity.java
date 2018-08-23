@@ -2,16 +2,15 @@ package com.lzx.okcall;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 
-import com.google.gson.Gson;
 import com.lzx.okcall.library.OkCall;
-import com.lzx.okcall.library.Response;
+import com.lzx.okcall.library.info.DownloadInfo;
 import com.lzx.okcall.library.rx.ResultTransformer;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
@@ -29,29 +28,44 @@ public class MainActivity extends RxAppCompatActivity {
                 request();
             }
         });
-
     }
 
     @SuppressLint("CheckResult")
     private void request() {
-        String url = "https://www.easy-mock.com/mock/5b4c0d81a618510d7322b2f0/example/query";
+        String url = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1535032435549&di=b32d355da356dab9c8dc1e6a6b714c52&imgtype=0&src=http%3A%2F%2Fs1.sinaimg.cn%2Fmw690%2F006amcbggy6Xu0MS22sf0%26690";
         OkCall.injectCall()
-                .get(url, null)
-                .rxBuild()
-                .compose(new ResultTransformer<>(LZX.class))
+                .rxDownload(url, Environment.getExternalStorageDirectory().getPath() + "/11111", "meinv.jpg")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<LZX>() {
+                .subscribe(new Consumer<DownloadInfo>() {
                     @Override
-                    public void accept(LZX json) {
-                        Log.i("MainActivity", "json = " + json.toString());
+                    public void accept(DownloadInfo downloadInfo) throws Exception {
+                        Log.i("MainActivity", "downloadInfo = " + downloadInfo.getStatus());
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable throwable) {
+                    public void accept(Throwable throwable) throws Exception {
                         Log.i("MainActivity", "throwable = " + throwable.getMessage());
                     }
                 });
+
+//        OkCall.injectCall()
+//                .get(url, null)
+//                .rxBuild()
+//                .compose(new ResultTransformer<>(LZX.class))
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Consumer<LZX>() {
+//                    @Override
+//                    public void accept(LZX json) {
+//                        Log.i("MainActivity", "json = " + json.toString());
+//                    }
+//                }, new Consumer<Throwable>() {
+//                    @Override
+//                    public void accept(Throwable throwable) {
+//                        Log.i("MainActivity", "throwable = " + throwable.getMessage());
+//                    }
+//                });
 
 //        OkCall.injectCall()
 //                .get(url, null)

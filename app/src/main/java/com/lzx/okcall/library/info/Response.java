@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lzx.okcall.library;
+package com.lzx.okcall.library.info;
 
 import android.support.annotation.Nullable;
 

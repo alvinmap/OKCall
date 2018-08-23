@@ -2,11 +2,16 @@ package com.lzx.okcall.library;
 
 import com.lzx.okcall.library.builder.CallRequest;
 import com.lzx.okcall.library.builder.RequestBuilder;
+import com.lzx.okcall.library.info.DownloadInfo;
+import com.lzx.okcall.library.rx.FileTransformer;
 
+import java.io.File;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
 import okhttp3.OkHttpClient;
 
 /**
@@ -49,6 +54,9 @@ public class OkCall {
         return mOkHttpClient;
     }
 
+    /**
+     * 普通GET请求
+     */
     public CallRequest get(String url, Map<String, Object> params) {
         String realUrl = handlerUrl(url);
         RequestBuilder requestBuilder = new RequestBuilder(Method.GET, realUrl, false, false, false);
@@ -62,6 +70,9 @@ public class OkCall {
         return new CallRequest(mOkHttpClient, requestBuilder);
     }
 
+    /**
+     * 普通POST请求
+     */
     public CallRequest post(String url, Map<String, Object> params) {
         String realUrl = handlerUrl(url);
         boolean hasBody = false;
@@ -82,13 +93,36 @@ public class OkCall {
         return new CallRequest(mOkHttpClient, requestBuilder);
     }
 
+    /**
+     * POST string
+     */
     public void postString() {
 
     }
 
+    /**
+     * POST file
+     */
     public void postFile() {
 
     }
+
+    /**
+     * 下载
+     */
+    public Observable<DownloadInfo> rxDownload(String downloadUrl, String destFileDir, String destFileName) {
+        return get(downloadUrl, null)
+                .rxBuild()
+                .compose(new FileTransformer(destFileDir, destFileName));
+    }
+
+    /**
+     * 上传
+     */
+    public void upload() {
+
+    }
+
 
     /**
      * 处理url
@@ -97,7 +131,9 @@ public class OkCall {
         return url;
     }
 
-
+    /**
+     * 请求类型
+     */
     public interface Method {
         String GET = "GET";
         String POST = "POST";

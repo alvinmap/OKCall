@@ -1,6 +1,6 @@
 package com.lzx.okcall.library.builder;
 
-import com.lzx.okcall.library.Response;
+import com.lzx.okcall.library.info.Response;
 import com.lzx.okcall.library.call.OkHttpCall;
 import com.lzx.okcall.library.rx.CallExecuteObservable;
 

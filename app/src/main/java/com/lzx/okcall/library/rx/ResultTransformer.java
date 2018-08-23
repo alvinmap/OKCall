@@ -1,26 +1,15 @@
 package com.lzx.okcall.library.rx;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import com.lzx.okcall.MainActivity;
-import com.lzx.okcall.library.Response;
+import com.lzx.okcall.library.info.Response;
 import com.lzx.okcall.library.Utils;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
-import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.List;
-
-import io.reactivex.Completable;
-import io.reactivex.CompletableSource;
-import io.reactivex.CompletableTransformer;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableTransformer;
 import io.reactivex.Maybe;
@@ -43,10 +32,8 @@ import okhttp3.ResponseBody;
  * create by lzx
  * time:2018/8/23
  */
-public class ResultTransformer<T> implements ObservableTransformer<Response, T>,
-        FlowableTransformer<Response, T>,
-        SingleTransformer<Response, T>,
-        MaybeTransformer<Response, T> {
+public class ResultTransformer<T> implements ObservableTransformer<Response, T>, FlowableTransformer<Response, T>,
+        SingleTransformer<Response, T>, MaybeTransformer<Response, T> {
 
     private Class<T> clazz;
     private Gson gson;
@@ -90,7 +77,6 @@ public class ResultTransformer<T> implements ObservableTransformer<Response, T>,
             }
         });
     }
-
 
     @Override
     public Publisher<T> apply(Flowable<Response> upstream) {
@@ -154,7 +140,6 @@ public class ResultTransformer<T> implements ObservableTransformer<Response, T>,
         });
     }
 
-
     @Override
     public SingleSource<T> apply(Single<Response> upstream) {
         return upstream.flatMap(new Function<Response, SingleSource<? extends T>>() {
@@ -185,8 +170,6 @@ public class ResultTransformer<T> implements ObservableTransformer<Response, T>,
             }
         });
     }
-
-
 }
 
 
