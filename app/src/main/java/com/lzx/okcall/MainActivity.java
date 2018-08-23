@@ -1,9 +1,6 @@
 package com.lzx.okcall;
 
 import android.annotation.SuppressLint;
-import android.content.ContentProvider;
-import android.os.Messenger;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,26 +8,15 @@ import android.view.View;
 import com.google.gson.Gson;
 import com.lzx.okcall.library.OkCall;
 import com.lzx.okcall.library.Response;
-import com.lzx.okcall.library.call.BaseDataCallBack;
-import com.lzx.okcall.library.call.Call;
-import com.lzx.okcall.library.call.Callback;
-
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import com.lzx.okcall.library.rx.ResultTransformer;
+import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends RxAppCompatActivity {
 
 
     @Override
@@ -52,78 +38,73 @@ public class MainActivity extends AppCompatActivity {
         OkCall.injectCall()
                 .get(url, null)
                 .rxBuild()
+                .compose(new ResultTransformer<>(LZX.class))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<String>() {
+                .subscribe(new Consumer<LZX>() {
                     @Override
-                    public void accept(String json) {
-                        Log.i("xian", "json = " + json);
+                    public void accept(LZX json) {
+                        Log.i("MainActivity", "json = " + json.toString());
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) {
-                        Log.i("xian", "throwable = " + throwable.getMessage());
+                        Log.i("MainActivity", "throwable = " + throwable.getMessage());
                     }
                 });
 
         OkCall.injectCall()
                 .get(url, null)
                 .rxBuild()
-                .map(new Function<String, LZX>() {
-                    @Override
-                    public LZX apply(String s) {
-                        return new Gson().fromJson(s, LZX.class);
-                    }
-                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<LZX>() {
+                .subscribe(new Consumer<Response>() {
                     @Override
-                    public void accept(LZX lzx) throws Exception {
-                        Log.i("xian", "json = " + lzx.toString());
+                    public void accept(Response response) throws Exception {
+                        Log.i("MainActivity", "json = " + response.body().string());
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable throwable) {
-                        Log.i("xian", "throwable = " + throwable.getMessage());
+                    public void accept(Throwable throwable) throws Exception {
+                        Log.i("MainActivity", "Throwable = " + throwable.getMessage());
                     }
                 });
-
-
-        OkCall.injectCall().get(url, null)
-                .build()
-                .enqueue(new Callback() {
-                    @Override
-                    public void onResponse(Call call, Response response) {
-                        try {
-                            Log.i("MainActivity", "json = " + response.body().string());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call call, Throwable t) {
-                        Log.i("MainActivity", "Throwable = " + t.getMessage());
-                    }
-                });
-
-        OkCall.injectCall().get(url, null)
-                .build()
-                .enqueue(new BaseDataCallBack<LZX>() {
-                    @Override
-                    public void onResponse(LZX result) {
-                        Log.i("MainActivity", "result = " + result.toString());
-                    }
-
-                    @Override
-                    public void onFailure(String errorString) {
-                        Log.i("MainActivity", "onFailure = " + errorString);
-                    }
-                });
+//
+//
+//        OkCall.injectCall().get(url, null)
+//                .build()
+//                .enqueue(new Callback() {
+//                    @Override
+//                    public void onResponse(Call call, Response response) {
+//                        try {
+//                            Log.i("MainActivity", "json = " + response.body().string());
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Call call, Throwable t) {
+//                        Log.i("MainActivity", "Throwable = " + t.getMessage());
+//                    }
+//                });
+//
+//        OkCall.injectCall().get(url, null)
+//                .build()
+//                .enqueue(new BaseDataCallBack<LZX>() {
+//                    @Override
+//                    public void onResponse(LZX result) {
+//                        Log.i("MainActivity", "result = " + result.toString());
+//                    }
+//
+//                    @Override
+//                    public void onFailure(String errorString) {
+//                        Log.i("MainActivity", "onFailure = " + errorString);
+//                    }
+//                });
     }
 
-    public class LZX {
+    public static class LZX {
         public String name;
         public String msg;
 
