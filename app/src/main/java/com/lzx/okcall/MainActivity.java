@@ -53,22 +53,22 @@ public class MainActivity extends RxAppCompatActivity {
                     }
                 });
 
-        OkCall.injectCall()
-                .get(url, null)
-                .rxBuild()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Response>() {
-                    @Override
-                    public void accept(Response response) throws Exception {
-                        Log.i("MainActivity", "json = " + response.body().string());
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        Log.i("MainActivity", "Throwable = " + throwable.getMessage());
-                    }
-                });
+//        OkCall.injectCall()
+//                .get(url, null)
+//                .rxBuild()
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Consumer<Response>() {
+//                    @Override
+//                    public void accept(Response response) throws Exception {
+//                        Log.i("MainActivity", "json = " + response.body().string());
+//                    }
+//                }, new Consumer<Throwable>() {
+//                    @Override
+//                    public void accept(Throwable throwable) throws Exception {
+//                        Log.i("MainActivity", "Throwable = " + throwable.getMessage());
+//                    }
+//                });
 //
 //
 //        OkCall.injectCall().get(url, null)

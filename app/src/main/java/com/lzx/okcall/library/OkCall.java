@@ -1,10 +1,8 @@
 package com.lzx.okcall.library;
 
-import com.lzx.okcall.library.builder.GetBuilder;
-import com.lzx.okcall.library.builder.PostBuilder;
+import com.lzx.okcall.library.builder.CallRequest;
 import com.lzx.okcall.library.builder.RequestBuilder;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -51,7 +49,7 @@ public class OkCall {
         return mOkHttpClient;
     }
 
-    public GetBuilder get(String url, Map<String, Object> params) {
+    public CallRequest get(String url, Map<String, Object> params) {
         String realUrl = handlerUrl(url);
         RequestBuilder requestBuilder = new RequestBuilder(Method.GET, realUrl, false, false, false);
         //组装参数
@@ -61,10 +59,10 @@ public class OkCall {
                 requestBuilder.addQueryParam(key, String.valueOf(params.get(key)), false);
             }
         }
-        return new GetBuilder(mOkHttpClient, requestBuilder);
+        return new CallRequest(mOkHttpClient, requestBuilder);
     }
 
-    public PostBuilder post(String url, Map<String, Object> params) {
+    public CallRequest post(String url, Map<String, Object> params) {
         String realUrl = handlerUrl(url);
         boolean hasBody = false;
         boolean isFormEncoded = false;
@@ -81,7 +79,7 @@ public class OkCall {
                 requestBuilder.addFormField(key, String.valueOf(params.get(key)), false);
             }
         }
-        return new PostBuilder(mOkHttpClient, requestBuilder);
+        return new CallRequest(mOkHttpClient, requestBuilder);
     }
 
     public void postString() {
