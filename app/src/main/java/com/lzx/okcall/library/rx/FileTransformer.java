@@ -1,5 +1,7 @@
 package com.lzx.okcall.library.rx;
 
+import android.util.Log;
+
 import com.lzx.okcall.library.info.DownloadInfo;
 import com.lzx.okcall.library.info.Response;
 import com.lzx.okcall.library.Utils;
@@ -25,6 +27,10 @@ import io.reactivex.SingleSource;
 import io.reactivex.SingleTransformer;
 import io.reactivex.functions.Function;
 import okhttp3.ResponseBody;
+import okio.Buffer;
+import okio.BufferedSink;
+import okio.BufferedSource;
+import okio.Okio;
 
 /**
  * json 数据转换
@@ -44,51 +50,68 @@ public class FileTransformer implements ObservableTransformer<Response, Download
         this.destFileName = destFileName;
     }
 
-    private File saveFile(Response response, String destFileDir, String destFileName) throws IOException {
+    /**
+     * 保存文件流
+     */
+    private DownloadInfo saveFile(Response response, String destFileDir, String destFileName, Observer<? super DownloadInfo> observer) throws IOException {
         ResponseBody value = response.body();
-        InputStream is = null;
-        byte[] buf = new byte[2048];
-        int len;
-        FileOutputStream fos = null;
-        try {
-            is = value.byteStream();
-            File dir = new File(destFileDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            File file = new File(dir, destFileName);
-
-            fos = new FileOutputStream(file);
-            while ((len = is.read(buf)) != -1) {
-                fos.write(buf, 0, len);
-            }
-            fos.flush();
-            return file;
-        } finally {
-            value.close();
-            if (is != null) is.close();
-            if (fos != null) fos.close();
+        //创建下载info
+        final DownloadInfo downloadInfo = new DownloadInfo();
+        downloadInfo.setDestFileDir(destFileDir);
+        downloadInfo.setDestFileName(destFileName);
+        downloadInfo.setFile(null);
+        if (value == null) {
+            downloadInfo.setStatus(DownloadInfo.FAIL);
+            return downloadInfo;
         }
+        File dir = new File(destFileDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        File output = new File(dir, destFileName);
+        //下载总进度
+        long contentLength = value.contentLength();
+        downloadInfo.setDownloadTotalSize(contentLength);
+        //读写文件
+        BufferedSink sink = Okio.buffer(Okio.sink(output));
+        Buffer buffer = sink.buffer();
+        long total = 0;
+        long len;
+        int bufferSize = 200 * 1024; //200kb
+        BufferedSource source = value.source();
+        while ((len = source.read(buffer, bufferSize)) != -1) {
+            sink.emit();
+            total += len;
+            downloadInfo.setDownloadProgress(total); //设置进度
+            downloadInfo.setStatus(DownloadInfo.DOWNLOADING);
+            observer.onNext(downloadInfo); //发射进度
+        }
+        //设置状态
+        downloadInfo.setStatus(output.exists() ? DownloadInfo.SUCCESS : DownloadInfo.FAIL);
+        source.close();
+        sink.close();
+        observer.onNext(downloadInfo); //下载完成发射最后一次进度
+        return downloadInfo;
     }
 
     @Override
     public ObservableSource<DownloadInfo> apply(final Observable<Response> upstream) {
         return upstream.flatMap(new Function<Response, ObservableSource<DownloadInfo>>() {
             @Override
-            public ObservableSource<DownloadInfo> apply(Response response) throws Exception {
+            public ObservableSource<DownloadInfo> apply(Response response) {
                 return upstream.flatMap(new Function<Response, ObservableSource<DownloadInfo>>() {
                     @Override
-                    public ObservableSource<DownloadInfo> apply(Response response) throws Exception {
-                        File file = saveFile(response, destFileDir, destFileName);
-                        final DownloadInfo downloadInfo = new DownloadInfo();
-                        downloadInfo.setStatus(file.exists() ? "success" : "fail");
-                        downloadInfo.setDestFileDir(destFileDir);
-                        downloadInfo.setDestFileName(destFileName);
-                        downloadInfo.setFile(file);
+                    public ObservableSource<DownloadInfo> apply(final Response response) {
                         return new ObservableSource<DownloadInfo>() {
                             @Override
                             public void subscribe(Observer<? super DownloadInfo> observer) {
-                                observer.onNext(downloadInfo);
+                                try {
+                                    saveFile(response, destFileDir, destFileName, observer); //保存文件
+                                    observer.onComplete(); //发射完成
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    observer.onError(e); //发射错误
+                                }
                             }
                         };
                     }

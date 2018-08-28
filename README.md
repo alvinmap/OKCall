@@ -119,3 +119,57 @@ rxBuild 返回的是 Observable，如果你想返回 Flowable，则用 rxBuildFl
 
 ### 普通POST请求
 POST 请求跟 GET 请求用法一样，只是方法名改成 post 即可。
+
+### RxJava 下载
+```java
+String url = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1535452255376&di=d901dcd43dd615dab51203b617e76ad5&imgtype=0&src=http%3A%2F%2Fgss0.baidu.com%2F-Po3dSag_xI4khGko9WTAnF6hhy%2Flvpics%2Fh%3D800%2Fsign%3D3a5bf403d043ad4bb92e4bc0b2035a89%2Fa8014c086e061d95e9133e9e7af40ad162d9ca3b.jpg";
+OkCall.injectCall()
+        .rxDownload(url, Environment.getExternalStorageDirectory().getPath() + "/11111", "meinv.jpg")
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Observer<DownloadInfo>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onNext(DownloadInfo info) {
+                if (info.getDownloadPercent() == 1) {
+                    Log.i("xian", "===下载完成===");
+                } else {
+                    Log.i("xian", "进度 = " + info.getDownloadPercent() + " progress = " + info.getDownloadProgress() + "  total = " + info.getDownloadTotalSize());
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.i("xian", "throwable = " + e.getMessage());
+            }
+
+            @Override
+            public void onComplete() {
+                Log.i("xian", " = 下载完成 = ");
+            }
+        });
+```
+
+RxJava 下载调用 rxDownload 方法，参数有三个，下载url，文件保存路径，保存文件名。回调信息为 DownloadInfo , 字段如下：
+
+```java
+public class DownloadInfo {
+    public static final String SUCCESS = "success"; //成功
+    public static final String FAIL = "fail"; //失败
+    public static final String DOWNLOADING = "downloading"; //下载中
+
+    private String status; //下载状态：SUCCESS,FAIL,DOWNLOADING
+    private String destFileDir; //保存路径
+    private String destFileName; //保存文件名
+    private File file; //file对象，下载失败的时候为null
+    private long downloadProgress = 0; //当前下载进度
+    private long downloadTotalSize = 0; //总大小
+    ...
+}
+```
+
+onNext(DownloadInfo info) 回调中会不断回调下载进度直到下载完成为止，所以可以通过 info.getDownloadPercent() 是否等于 1，或者 info.getStatus() 是否等于 DownloadInfo.SUCCESS 来判断是否下载完成。

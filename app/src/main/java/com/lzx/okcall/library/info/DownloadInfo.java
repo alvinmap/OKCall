@@ -8,10 +8,16 @@ import java.io.File;
  * time:2018/8/23
  */
 public class DownloadInfo {
-    private String status;
-    private String destFileDir;
-    private String destFileName;
-    private File file;
+    public static final String SUCCESS = "success"; //成功
+    public static final String FAIL = "fail"; //失败
+    public static final String DOWNLOADING = "downloading"; //下载中
+
+    private String status; //下载状态：SUCCESS,FAIL,DOWNLOADING
+    private String destFileDir; //保存路径
+    private String destFileName; //保存文件名
+    private File file; //file对象，下载失败的时候为null
+    private long downloadProgress = 0; //当前下载进度
+    private long downloadTotalSize = 0; //总大小
 
     public String getStatus() {
         return status;
@@ -43,5 +49,29 @@ public class DownloadInfo {
 
     public void setFile(File file) {
         this.file = file;
+    }
+
+    public long getDownloadProgress() {
+        return downloadProgress;
+    }
+
+    public void setDownloadProgress(long downloadProgress) {
+        this.downloadProgress = downloadProgress;
+    }
+
+    public long getDownloadTotalSize() {
+        return downloadTotalSize;
+    }
+
+    public void setDownloadTotalSize(long downloadTotalSize) {
+        this.downloadTotalSize = downloadTotalSize;
+    }
+
+    public float getDownloadPercent() {
+        if (downloadTotalSize != 0) {
+            return (float) downloadProgress / (float) downloadTotalSize;
+        } else {
+            return 0;
+        }
     }
 }
